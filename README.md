@@ -60,9 +60,9 @@ cd Apple-TV-Hue-Integration
 Or download the ZIP and extract it.
 
 Run Setup
-bash
-Copy code
-python setup.py
+Find the location of the extracted file then open command prompt in Windows.
+cd Apple-TV-Hue-Integration    "press enter"
+Then enter in     python setup.py   "press enter"
 If Python isn’t recognized, ensure it’s installed (3.7 or higher) and in your PATH.
 During setup:
 
@@ -71,21 +71,24 @@ The script installs dependencies from requirements.txt.
 It launches the Flask server in a detached process—no console needed.
 Opens your default browser to http://<host>:<port>.
 Closes its own setup console automatically.
-Confirm Setup
+
 Look for the system tray icon (Windows typically places new icons in the “hidden icons” area).
 The web dashboard should be open in your browser. If not, manually visit http://<host>:<port>.
+
+
 Future Launches
 On Windows, the script creates a run.bat file for you to double-click next time.
 On macOS/Linux, simply run python app.py & (or setup.py again, though setup is only needed once).
+
 Usage
 Windows
 After the first install, find run.bat in the project folder.
-
 Double-click run.bat:
 Starts app.py in a console.
 System tray icon appears near the clock.
 Possibly opens the browser automatically (depending on how run.bat is configured).
 Closing the console will kill the app if using python.
+
 If you want it to keep running after you close the console, edit run.bat to use pythonw app.py or:
 
 bat
@@ -106,6 +109,7 @@ python app.py &
 # or
 nohup python app.py &
 If you have a desktop environment, the tray icon should appear in the menubar (macOS) or system tray (e.g., GNOME/KDE on Linux).
+
 On a headless Linux server, the tray icon won’t show (no GUI), but the Flask server still runs. Access it in your browser from any machine that can reach the server’s IP.
 Configuration
 config.json
@@ -119,7 +123,9 @@ Copy code
 }
 host: the IP address your Flask server binds to.
 port: the TCP port to listen on (default 8888).
+
 requirements.txt
+
 Lists your Python dependencies:
 
 Flask
