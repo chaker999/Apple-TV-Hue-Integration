@@ -61,9 +61,10 @@ Or download the ZIP and extract it.
 
 Run Setup:
 
-bash
-Copy code
+Open command prompt on windows.  cd to the folder that you just extracted and enter:
 python setup.py
+press enter
+
 If Python isn’t recognized, ensure it’s installed (3.7 or higher) and in your PATH.
 During setup:
 You’ll be prompted for a host IP (default: 127.0.0.1) and a port (default: 8888).
