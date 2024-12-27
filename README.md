@@ -54,7 +54,7 @@ This project connects **Apple TVs** and **Hue Bridges** under one roof:
 
 You can either **clone** this repository or **download the ZIP**.
 
-```bash
+
 git clone https://github.com/chaker999/Apple-TV-Hue-Integration.git
 cd Apple-TV-Hue-Integration
 Or download the ZIP and extract it.
@@ -157,3 +157,8 @@ You’re free to copy, modify, and distribute as long as you retain the original
 
 Enjoy controlling your Apple TV and Hue lights from one unified interface!
 Feel free to open an issue or create a pull request if you have improvements or run into any problems.
+
+#license
+- This project is licensed under the MIT License.
+- You’re free to copy, modify, and distribute as long as you retain the original license text.
+
