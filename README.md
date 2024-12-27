@@ -54,15 +54,25 @@ This project connects **Apple TVs** and **Hue Bridges** under one roof:
 
 You can either **clone** this repository or **download the ZIP**.
 
-
+```bash
 git clone https://github.com/chaker999/Apple-TV-Hue-Integration.git
 cd Apple-TV-Hue-Integration
-Or download the ZIP and extract it.
+
+If you download the ZIP instead, extract it to a folder of your choice.
 
 Run Setup
-Find the location of the extracted file then open command prompt in Windows.
-cd Apple-TV-Hue-Integration    "press enter"
-python setup.py   "press enter"
+Find where you extracted/cloned the repository.
+
+Open a Command Prompt (Windows) or Terminal (macOS/Linux) in that folder.
+
+On Windows:
+
+bash
+Copy code
+cd Apple-TV-Hue-Integration
+python setup.py
+Press Enter after each command.
+
 If Python isn’t recognized, ensure it’s installed (3.7 or higher) and in your PATH.
 During setup:
 
@@ -70,16 +80,12 @@ You’ll be prompted for a host IP (default: 127.0.0.1) and a port (default: 888
 The script installs dependencies from requirements.txt.
 It launches the Flask server in a detached process—no console needed.
 Opens your default browser to http://<host>:<port>.
-Closes its own setup console automatically.
-
-Look for the system tray icon (Windows typically places new icons in the “hidden icons” area).
-The web dashboard should be open in your browser. If not, manually visit http://<host>:<port>.
-
+Closes its own setup console automatically when finished.
+Look for the system tray icon (Windows typically places new icons in the “hidden icons” area). The web dashboard should be open in your browser. If not, manually visit http://<host>:<port>.
 
 Future Launches
 On Windows, the script creates a run.bat file for you to double-click next time.
-On macOS/Linux, simply run python app.py & (or setup.py again, though setup is only needed once).
-
+On macOS/Linux, simply run python app.py & (or python setup.py again, although setup is only needed once).
 Usage
 Windows
 After the first install, find run.bat in the project folder.
@@ -88,8 +94,7 @@ Starts app.py in a console.
 System tray icon appears near the clock.
 Possibly opens the browser automatically (depending on how run.bat is configured).
 Closing the console will kill the app if using python.
-
-If you want it to keep running after you close the console, edit run.bat to use pythonw app.py or:
+If you want it to keep running after you close the console, edit run.bat to use pythonw app.py, or:
 
 bat
 Copy code
@@ -103,13 +108,12 @@ No .bat file is created here. Instead:
 
 bash
 Copy code
-# Start the app
+# Start the app in the background
 python app.py &
 
 # or
 nohup python app.py &
-If you have a desktop environment, the tray icon should appear in the menubar (macOS) or system tray (e.g., GNOME/KDE on Linux).
-
+If you have a desktop environment, the tray icon should appear in the menubar (macOS) or system tray (GNOME/KDE on Linux).
 On a headless Linux server, the tray icon won’t show (no GUI), but the Flask server still runs. Access it in your browser from any machine that can reach the server’s IP.
 Configuration
 config.json
@@ -123,9 +127,7 @@ Copy code
 }
 host: the IP address your Flask server binds to.
 port: the TCP port to listen on (default 8888).
-
 requirements.txt
-
 Lists your Python dependencies:
 
 Flask
@@ -136,8 +138,7 @@ Pillow
 …and possibly more. These are installed automatically when you run setup.py.
 Troubleshooting
 Tray Icon Missing
-Check “hidden icons” on Windows or look for the menubar icon on macOS.
-Ensure you’re running on a graphical desktop environment.
+Check “hidden icons” on Windows or the menubar on macOS. Ensure you’re running on a graphical desktop environment.
 
 Closing the Console Kills the App (Windows)
 By default, if you run python app.py in a standard console, closing it ends the process. Use pythonw.exe or DETACHED_PROCESS flags to keep it running after the console closes. The run.bat approach can be modified to start pythonw app.py.
@@ -150,13 +151,3 @@ If you need real-time logs, run python app.py in a normal console to see output.
 
 Headless Linux
 No tray icon is possible without a GUI. You can still use the web UI for all interactions.
-
-License
-This project is licensed under the MIT License.
-You’re free to copy, modify, and distribute as long as you retain the original license text.
-
-Enjoy controlling your Apple TV and Hue lights from one unified interface!
-Feel free to open an issue or create a pull request if you have improvements or run into any problems.
-
-
-
