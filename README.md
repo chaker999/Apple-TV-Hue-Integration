@@ -20,6 +20,7 @@ Hue Integration: Connect to a Hue Bridge, pair lights, and define rooms/scenes.
 System Tray: A tray icon (via pystray) runs in the background, letting you right-click to exit or launch the web UI.
 Flask Web UI: Easily manage Apple TV pairing, Hue bridges, and automation rules from a browser.
 Cross-Platform: Works on Windows, macOS, and Linux (with a GUI environment for the tray icon).
+
 Requirements
 Python 3.7+
 Internet/LAN access to your Apple TVs and Hue Bridge.
@@ -30,6 +31,8 @@ Flask (web framework)
 pyatv (Apple TV integration)
 phue (Philips Hue library)
 pystray + Pillow (system tray icon)
+
+
 Installation
 Clone or Download this repository from GitHub:
 
