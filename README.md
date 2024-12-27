@@ -8,15 +8,16 @@ Seamlessly integrate your **Apple TV** with **Philips Hue** lighting via a **Fla
 ---
 
 ## Table of Contents
-1. [Overview](#overview)
-2. [Features](#features)
-3. [Requirements](#requirements)
-4. [Installation](#installation)
-5. [Usage](#usage)
-   - [Windows](#windows)
-   - [macOS & Linux](#macos--linux)
-6. [Configuration](#configuration)
-7. [Troubleshooting](#troubleshooting)
+
+1. [Overview](#overview)  
+2. [Features](#features)  
+3. [Requirements](#requirements)  
+4. [Installation](#installation)  
+5. [Usage](#usage)  
+   - [Windows](#windows)  
+   - [macOS & Linux](#macos--linux)  
+6. [Configuration](#configuration)  
+7. [Troubleshooting](#troubleshooting)  
 8. [License](#license)
 
 ---
@@ -58,7 +59,7 @@ You can either **clone** this repository or **download the ZIP**.
 git clone https://github.com/chaker999/Apple-TV-Hue-Integration.git
 cd Apple-TV-Hue-Integration
 
-If you download the ZIP instead, extract it to a folder of your choice.
+If you download the ZIP, extract it to a folder of your choice.
 
 Run Setup
 Find where you extracted/cloned the repository.
@@ -67,11 +68,9 @@ Open a Command Prompt (Windows) or Terminal (macOS/Linux) in that folder.
 
 On Windows:
 
-bash
-Copy code
 cd Apple-TV-Hue-Integration
 python setup.py
-Press Enter after each command.
+(Press Enter after each command.)
 
 If Python isn’t recognized, ensure it’s installed (3.7 or higher) and in your PATH.
 During setup:
@@ -85,13 +84,17 @@ Look for the system tray icon (Windows typically places new icons in the “hidd
 
 Future Launches
 On Windows, the script creates a run.bat file for you to double-click next time.
-On macOS/Linux, simply run python app.py & (or python setup.py again, although setup is only needed once).
+On macOS/Linux, simply run:
+bash
+Copy code
+python app.py &
+(or python setup.py again, although setup is only needed once).
 Usage
 Windows
 After the first install, find run.bat in the project folder.
 Double-click run.bat:
 Starts app.py in a console.
-System tray icon appears near the clock.
+The system tray icon appears near the clock.
 Possibly opens the browser automatically (depending on how run.bat is configured).
 Closing the console will kill the app if using python.
 If you want it to keep running after you close the console, edit run.bat to use pythonw app.py, or:
@@ -138,7 +141,7 @@ Pillow
 …and possibly more. These are installed automatically when you run setup.py.
 Troubleshooting
 Tray Icon Missing
-Check “hidden icons” on Windows or the menubar on macOS. Ensure you’re running on a graphical desktop environment.
+Check “hidden icons” on Windows or look for the menubar icon on macOS. Ensure you’re running on a graphical desktop environment.
 
 Closing the Console Kills the App (Windows)
 By default, if you run python app.py in a standard console, closing it ends the process. Use pythonw.exe or DETACHED_PROCESS flags to keep it running after the console closes. The run.bat approach can be modified to start pythonw app.py.
@@ -151,3 +154,10 @@ If you need real-time logs, run python app.py in a normal console to see output.
 
 Headless Linux
 No tray icon is possible without a GUI. You can still use the web UI for all interactions.
+
+License
+This project is licensed under the MIT License.
+You’re free to copy, modify, and distribute as long as you retain the original license text.
+
+Enjoy controlling your Apple TV and Hue lights from one unified interface!
+Feel free to open an issue or create a pull request if you have improvements or run into any problems.
