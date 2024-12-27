@@ -62,7 +62,7 @@ Or download the ZIP and extract it.
 Run Setup
 Find the location of the extracted file then open command prompt in Windows.
 cd Apple-TV-Hue-Integration    "press enter"
-Then enter in     python setup.py   "press enter"
+python setup.py   "press enter"
 If Python isn’t recognized, ensure it’s installed (3.7 or higher) and in your PATH.
 During setup:
 
