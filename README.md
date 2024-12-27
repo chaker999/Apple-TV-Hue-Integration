@@ -158,7 +158,5 @@ You’re free to copy, modify, and distribute as long as you retain the original
 Enjoy controlling your Apple TV and Hue lights from one unified interface!
 Feel free to open an issue or create a pull request if you have improvements or run into any problems.
 
-#license
-- This project is licensed under the MIT License.
-- You’re free to copy, modify, and distribute as long as you retain the original license text.
+
 
