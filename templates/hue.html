@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container mt-4">
+  <h2>Pair with Hue Bridge</h2>
+  <p>
+    Enter the IP address of your Hue Bridge below.  Then press the link button on your Hue Bridge. The app will store
+    the user token in the DB for future use. Once paired, you can refresh
+    lights to see what's connected.
+  </p>
+
+  <form id="hueForm">
+    <div class="mb-3">
+      <label for="bridgeIp" class="form-label">Hue Bridge IP</label>
+      <input type="text" class="form-control" id="bridgeIp" placeholder="192.168.1.x" />
+    </div>
+    <button class="btn btn-primary" type="submit">Pair</button>
+  </form>
+
+  <hr />
+  <h4>Bridge Status</h4>
+  <button id="btnBridgeStatus" class="btn btn-secondary">Refresh Bridge Status</button>
+  <pre id="bridgeStatus"></pre>
+
+  <hr />
+  <h4>Discovered Lights</h4>
+  <button id="btnListLights" class="btn btn-secondary">Refresh Lights</button>
+  <pre id="lightsOutput"></pre>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+const hueForm       = document.getElementById('hueForm');
+const bridgeIpInput = document.getElementById('bridgeIp');
+const btnBridgeStatus = document.getElementById('btnBridgeStatus');
+const bridgeStatus   = document.getElementById('bridgeStatus');
+const btnListLights  = document.getElementById('btnListLights');
+const lightsOutput   = document.getElementById('lightsOutput');
+
+// Pair the Bridge
+hueForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const ip = bridgeIpInput.value.trim();
+
+  axios.post('/api/hue/pair', {
+    bridge_ip: ip
+  })
+  .then(resp => {
+    bridgeStatus.textContent = JSON.stringify(resp.data, null, 2);
+  })
+  .catch(err => {
+    bridgeStatus.textContent = 'Error: ' + (err.response?.data?.error || err);
+  });
+});
+
+// Show the stored HueBridge config
+btnBridgeStatus.addEventListener('click', () => {
+  axios.get('/api/hue/status')
+  .then(resp => {
+    bridgeStatus.textContent = JSON.stringify(resp.data, null, 2);
+  })
+  .catch(err => {
+    bridgeStatus.textContent = 'Error: ' + (err.response?.data?.error || err);
+  });
+});
+
+// List Lights
+btnListLights.addEventListener('click', () => {
+  lightsOutput.textContent = 'Loading lights...';
+  axios.get('/api/hue/lights')
+    .then(resp => {
+      if (resp.data.error) {
+        lightsOutput.textContent = 'Error: ' + resp.data.error;
+      } else {
+        lightsOutput.textContent = JSON.stringify(resp.data, null, 2);
+      }
+    })
+    .catch(err => {
+      lightsOutput.textContent = 'Error: ' + (err.response?.data?.error || err);
+    });
+});
+</script>
+
+{% endblock %}

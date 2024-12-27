@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Apple TV and Hue Lights Setup</h1>
+<p>This server listens for Apple TV playback changes and controls Hue lights.</p>
+
+<div class="alert alert-info">
+  Use the navigation bar to add rooms, pair Apple TVs, and connect your Hue Bridge. 
+</div>
+
+<hr />
+
+<h3>Real-Time Logs</h3>
+<pre id="logOutput" style="background:#f8f9fa; padding:1em; max-height:300px; overflow-y:auto;"></pre>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+function fetchLogs() {
+  axios.get("/api/logs")
+    .then(resp => {
+      const lines = resp.data; // array of strings
+      const pre = document.getElementById("logOutput");
+      pre.textContent = lines.join("\n");
+      // auto-scroll
+      pre.scrollTop = pre.scrollHeight;
+    })
+    .catch(err => {
+      console.log("Error fetching logs:", err);
+    });
+}
+
+// Poll every 3 seconds
+setInterval(fetchLogs, 3000);
+
+// fetch once on load
+document.addEventListener("DOMContentLoaded", () => {
+  fetchLogs();
+});
+</script>
+{% endblock %}

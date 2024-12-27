@@ -1,0 +1,406 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Manage Rooms</h2>
+<p>
+  Create and manage user-defined “rooms” that link an Apple TV to selected Hue lights,
+  and configure brightness for <em>playing</em>, <em>paused</em>, and <em>stopped</em>.  To create a room, enter a Room Name below.  Select the Apple TV that has been paired.  Select the lights you want the ATV to control.  Set the desired brightness and then save the room.  
+</p>
+
+<div class="row">
+  <!-- LEFT: Create/Edit Room Form -->
+  <div class="col-md-6">
+    <h4 id="roomFormTitle">Create a New Room</h4>
+    <form id="formRoomSetup">
+      <input type="hidden" id="editRoomName" />
+
+      <!-- Room Name -->
+      <div class="mb-3">
+        <label for="inputRoomName" class="form-label fw-bold">Room Name</label>
+        <input
+          type="text"
+          class="form-control"
+          id="inputRoomName"
+          placeholder="Garage"
+          required
+        />
+      </div>
+
+      <!-- Apple TV selection -->
+      <div class="mb-3">
+        <label for="selectAppleTV" class="form-label fw-bold">Select Apple TV</label>
+        <select class="form-select" id="selectAppleTV">
+          <option value="">Loading Apple TVs...</option>
+        </select>
+        <small class="text-muted">
+          These are the <em>paired</em> Apple TVs from the DB.
+        </small>
+      </div>
+
+      <!-- Hue Lights selection -->
+      <div class="mb-3">
+        <label for="selectHueLights" class="form-label fw-bold">Select Hue Lights</label>
+        <select class="form-select" id="selectHueLights" multiple></select>
+        <small class="text-muted">
+          Ctrl+click to select multiple. If empty, pair Hue on the "Hue" page.
+        </small>
+      </div>
+
+      <!-- Brightness Sliders (0–100) -->
+      <div class="mb-3">
+        <label for="sliderPlaying" class="form-label fw-bold">Playing Brightness</label>
+        <input
+          type="range"
+          class="form-range"
+          min="0"
+          max="100"
+          id="sliderPlaying"
+          value="60"
+        />
+        <span id="labelPlayingVal">60%</span>
+      </div>
+      <div class="mb-3">
+        <label for="sliderPaused" class="form-label fw-bold">Paused Brightness</label>
+        <input
+          type="range"
+          class="form-range"
+          min="0"
+          max="100"
+          id="sliderPaused"
+          value="80"
+        />
+        <span id="labelPausedVal">80%</span>
+      </div>
+      <div class="mb-3">
+        <label for="sliderStopped" class="form-label fw-bold">Stopped Brightness</label>
+        <input
+          type="range"
+          class="form-range"
+          min="0"
+          max="100"
+          id="sliderStopped"
+          value="100"
+        />
+        <span id="labelStoppedVal">100%</span>
+      </div>
+
+      <button type="submit" class="btn btn-primary">Save Room</button>
+      <button type="button" class="btn btn-secondary" id="btnCancelEdit" style="display:none;">
+        Cancel
+      </button>
+    </form>
+  </div>
+
+  <!-- RIGHT: List of user-defined rooms -->
+  <div class="col-md-6">
+    <div class="d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">Rooms</h4>
+      <button class="btn btn-sm btn-secondary" id="refreshRoomsBtn">
+        Refresh
+      </button>
+    </div>
+    <hr />
+    <ul class="list-group" id="roomsList"></ul>
+  </div>
+</div>
+
+<hr />
+
+<!-- Debug Console -->
+<div class="row mt-3">
+  <div class="col-12">
+    <h4>Debug Console</h4>
+    <pre
+      id="debugConsole"
+      style="background: #f8f9fa; padding: 1em; max-height: 300px; overflow-y: auto;"
+    ></pre>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+let discoveredATVs = {};  // { "Garage Apple TV": { "apple_tv_id":"my_garage_tv", "ip":"192.168.1.84", "connected":true }, ... }
+
+function appendDebug(msg) {
+  const dbg = document.getElementById("debugConsole");
+  dbg.textContent += msg + "\n";
+  dbg.scrollTop = dbg.scrollHeight;
+}
+
+// Convert range slider (0–100) to integer
+function getSliderVal(id) {
+  return parseInt(document.getElementById(id).value, 10);
+}
+
+function updateSliderLabel(sliderId, labelId) {
+  const val = document.getElementById(sliderId).value;
+  document.getElementById(labelId).textContent = val + "%";
+}
+
+// ---------------------------------------------------------------------------
+// Fetch Apple TVs
+// ---------------------------------------------------------------------------
+function fetchAppleTVs() {
+  const sel = document.getElementById("selectAppleTV");
+  sel.innerHTML = "<option>Loading Apple TVs...</option>";
+
+  axios.get("/api/apple_tvs")
+    .then(resp => {
+      discoveredATVs = resp.data;
+      sel.innerHTML = "";
+      const names = Object.keys(discoveredATVs);
+      if (names.length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "No Apple TVs found. Please pair first.";
+        sel.appendChild(opt);
+      } else {
+        names.forEach(nm => {
+          const opt = document.createElement("option");
+          opt.value = nm;
+          let label = nm;
+          if (discoveredATVs[nm].connected) {
+            label += " (connected)";
+          }
+          opt.textContent = label;
+          sel.appendChild(opt);
+        });
+      }
+      appendDebug("Fetched AppleTVs => " + JSON.stringify(discoveredATVs));
+    })
+    .catch(err => {
+      appendDebug("Error fetching AppleTVs => " + err);
+      sel.innerHTML = "<option>Error loading AppleTVs</option>";
+    });
+}
+
+// ---------------------------------------------------------------------------
+// Fetch Hue Lights
+// ---------------------------------------------------------------------------
+function fetchHueLights() {
+  const sel = document.getElementById("selectHueLights");
+  sel.innerHTML = "<option>Loading lights...</option>";
+
+  axios.get("/api/hue/lights")
+    .then(resp => {
+      const data = resp.data;  // e.g. { "11":"Garage1", ... }
+      sel.innerHTML = "";
+      if (Object.keys(data).length === 0) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "No lights found or no Hue Bridge.";
+        sel.appendChild(opt);
+      } else {
+        for (const lid in data) {
+          const opt = document.createElement("option");
+          opt.value = lid;
+          opt.textContent = data[lid];
+          sel.appendChild(opt);
+        }
+      }
+      appendDebug("Fetched Hue Lights => " + JSON.stringify(data));
+    })
+    .catch(err => {
+      appendDebug("Error fetching Hue lights => " + err);
+      sel.innerHTML = "<option>Error loading Hue lights</option>";
+    });
+}
+
+// ---------------------------------------------------------------------------
+// Refresh user-defined Rooms
+// ---------------------------------------------------------------------------
+function refreshRoomsList() {
+  axios.get("/api/rooms")
+    .then(resp => {
+      const data = resp.data;  // { "Garage": {...}, ... }
+      const list = document.getElementById("roomsList");
+      list.innerHTML = "";
+
+      Object.keys(data).forEach(rn => {
+        const info = data[rn];
+        const li = document.createElement("li");
+        li.className = "list-group-item mb-2";
+
+        // find Apple TV label
+        let atvLabel = "(None)";
+        let atvIP = "(NoHost)";
+        for (const nm of Object.keys(discoveredATVs)) {
+          if (discoveredATVs[nm].apple_tv_id === info.apple_tv_id) {
+            atvLabel = nm;
+            atvIP = discoveredATVs[nm].ip;
+            break;
+          }
+        }
+        const textHtml = `
+          <div class="fw-bold">${rn}</div>
+          <div class="small text-muted">
+            Apple TV: ${atvLabel} (IP: ${atvIP})<br />
+            Lights: [${(info.light_ids || []).join(", ")}]
+          </div>
+          <div class="small text-muted">
+            Brightness => Playing: ${info.playing_bri}, Paused: ${info.paused_bri}, Stopped: ${info.stopped_bri}
+          </div>
+        `;
+        li.innerHTML = textHtml;
+
+        const divBtns = document.createElement("div");
+        divBtns.className = "mt-2";
+
+        // Edit
+        const btnE = document.createElement("button");
+        btnE.textContent = "Edit";
+        btnE.className = "btn btn-sm btn-warning me-2";
+        btnE.onclick = () => {
+          loadRoomForEdit(rn, info);
+        };
+        divBtns.appendChild(btnE);
+
+        // Delete
+        const btnD = document.createElement("button");
+        btnD.textContent = "Delete";
+        btnD.className = "btn btn-sm btn-danger";
+        btnD.onclick = () => {
+          deleteRoom(rn);
+        };
+        divBtns.appendChild(btnD);
+
+        li.appendChild(divBtns);
+        list.appendChild(li);
+      });
+      appendDebug("Refreshed rooms => " + JSON.stringify(data));
+    })
+    .catch(err => {
+      appendDebug("Error refreshing rooms => " + err);
+    });
+}
+
+// ---------------------------------------------------------------------------
+// Load an existing room for editing
+// ---------------------------------------------------------------------------
+function loadRoomForEdit(roomName, info) {
+  appendDebug("Editing room => " + roomName);
+
+  document.getElementById("roomFormTitle").textContent = "Edit Room: " + roomName;
+  document.getElementById("editRoomName").value = roomName;
+  document.getElementById("inputRoomName").value = roomName;
+
+  // Pre-select Hue lights
+  const hueSel = document.getElementById("selectHueLights");
+  Array.from(hueSel.options).forEach(opt => {
+    opt.selected = (info.light_ids || []).includes(parseInt(opt.value));
+  });
+
+  // Sliders
+  document.getElementById("sliderPlaying").value = info.playing_bri || 60;
+  document.getElementById("sliderPaused").value  = info.paused_bri  || 80;
+  document.getElementById("sliderStopped").value = info.stopped_bri || 100;
+
+  updateSliderLabel("sliderPlaying","labelPlayingVal");
+  updateSliderLabel("sliderPaused","labelPausedVal");
+  updateSliderLabel("sliderStopped","labelStoppedVal");
+
+  document.getElementById("btnCancelEdit").style.display = "inline-block";
+}
+
+// ---------------------------------------------------------------------------
+// Cancel edit
+// ---------------------------------------------------------------------------
+function cancelEditRoom() {
+  document.getElementById("editRoomName").value = "";
+  document.getElementById("roomFormTitle").textContent = "Create a New Room";
+  document.getElementById("inputRoomName").value = "";
+
+  document.getElementById("selectAppleTV").selectedIndex = 0;
+  document.getElementById("selectHueLights").selectedIndex = -1;
+
+  document.getElementById("sliderPlaying").value = 60;
+  document.getElementById("labelPlayingVal").textContent = "60%";
+  document.getElementById("sliderPaused").value = 80;
+  document.getElementById("labelPausedVal").textContent = "80%";
+  document.getElementById("sliderStopped").value = 100;
+  document.getElementById("labelStoppedVal").textContent = "100%";
+
+  document.getElementById("btnCancelEdit").style.display = "none";
+}
+
+// ---------------------------------------------------------------------------
+// Save or Update a Room
+// ---------------------------------------------------------------------------
+function saveRoom(e) {
+  e.preventDefault();
+
+  const editName = document.getElementById("editRoomName").value.trim();
+  const newName  = document.getElementById("inputRoomName").value.trim();
+
+  // Apple TV
+  const atvSel = document.getElementById("selectAppleTV").value;
+  let finalAtvId = "";
+  if (atvSel && discoveredATVs[atvSel]) {
+    finalAtvId = discoveredATVs[atvSel].apple_tv_id;
+  }
+
+  // Hue lights
+  const hueSel = document.getElementById("selectHueLights");
+  const lids = Array.from(hueSel.selectedOptions).map(o => parseInt(o.value));
+
+  // Sliders => 0–100
+  const pVal = parseInt(document.getElementById("sliderPlaying").value, 10);
+  const paVal= parseInt(document.getElementById("sliderPaused").value, 10);
+  const sVal = parseInt(document.getElementById("sliderStopped").value, 10);
+
+  axios.post("/api/rooms", {
+    room_name: newName,
+    apple_tv_id: finalAtvId,
+    light_ids: lids,
+    playing_bri: pVal,
+    paused_bri: paVal,
+    stopped_bri: sVal
+  })
+  .then(resp => {
+    appendDebug("Saved room => " + JSON.stringify(resp.data));
+    refreshRoomsList();
+    cancelEditRoom();
+  })
+  .catch(err => {
+    appendDebug("Error saving room => " + err);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Delete a room
+// ---------------------------------------------------------------------------
+function deleteRoom(roomName) {
+  axios.delete("/api/rooms/" + encodeURIComponent(roomName))
+    .then(resp => {
+      appendDebug("Room deleted => " + JSON.stringify(resp.data));
+      refreshRoomsList();
+    })
+    .catch(err => {
+      appendDebug("Error deleting room => " + err);
+    });
+}
+
+// ---------------------------------------------------------------------------
+// Page init
+// ---------------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", () => {
+  // Sliders => label
+  document.getElementById("sliderPlaying").addEventListener("input", () =>
+    updateSliderLabel("sliderPlaying","labelPlayingVal")
+  );
+  document.getElementById("sliderPaused").addEventListener("input", () =>
+    updateSliderLabel("sliderPaused","labelPausedVal")
+  );
+  document.getElementById("sliderStopped").addEventListener("input", () =>
+    updateSliderLabel("sliderStopped","labelStoppedVal")
+  );
+
+  document.getElementById("formRoomSetup").addEventListener("submit", saveRoom);
+  document.getElementById("btnCancelEdit").addEventListener("click", cancelEditRoom);
+  document.getElementById("refreshRoomsBtn").addEventListener("click", refreshRoomsList);
+
+  fetchAppleTVs();
+  fetchHueLights();
+  refreshRoomsList();
+});
+</script>
+{% endblock %}

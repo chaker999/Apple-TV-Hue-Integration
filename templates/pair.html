@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h1>Pair an Apple TV</h1>
+
+  <p>
+    Enter a unique <strong>Apple TV ID</strong> (any slug or label you like),
+    plus the <strong>Apple TV Name</strong> (this is found in ATV, settings, General, you need to enter the exact name of your Apple TV),
+    and the <strong>IP Address</strong>. Then select the protocol you want
+    (<strong>Companion</strong> or <strong>Airplay</strong>), and press
+    <em>Start Pairing.</em> A PIN will appear on that Apple TV, enter it below
+    to finish pairing.  NOTE: For best results choose  <strong>Companion</strong> over AirPlay.
+  </p>
+
+  <!-- Pairing Form -->
+  <form id="formPairing" class="row g-3">
+    <!-- Apple TV ID -->
+    <div class="col-md-4">
+      <label for="tvID" class="form-label fw-bold">Apple TV ID (unique)</label>
+      <input
+        type="text"
+        class="form-control"
+        id="tvID"
+        placeholder="my_garage_tv"
+        required
+      />
+    </div>
+
+    <!-- Apple TV Name -->
+    <div class="col-md-4">
+      <label for="tvName" class="form-label fw-bold">Apple TV Friendly Name</label>
+      <input
+        type="text"
+        class="form-control"
+        id="tvName"
+        placeholder="Garage Apple TV"
+        required
+      />
+    </div>
+
+    <!-- IP Address -->
+    <div class="col-md-4">
+      <label for="tvIP" class="form-label fw-bold">IP Address</label>
+      <input
+        type="text"
+        class="form-control"
+        id="tvIP"
+        placeholder="192.168.1.x"
+        required
+      />
+    </div>
+
+    <!-- Protocol selection -->
+<div class="col-md-4">
+  <label for="tvProtocol" class="form-label fw-bold">Protocol</label>
+  <select class="form-select" id="tvProtocol">
+    <!-- Companion first, selected by default -->
+    <option value="companion" selected>Companion</option>
+    <option value="airplay">AirPlay</option>
+  </select>
+</div>
+
+
+    <div class="col-md-12">
+      <button type="submit" class="btn btn-primary">Start Pairing</button>
+    </div>
+  </form>
+
+  <hr />
+
+  <!-- Step 2: Enter PIN -->
+  <form id="formPin" class="row g-3" style="display: none">
+    <div class="col-md-3">
+      <label for="pinCode" class="form-label fw-bold">Enter PIN from Apple TV</label>
+      <input
+        type="text"
+        class="form-control"
+        id="pinCode"
+        placeholder="1234"
+      />
+    </div>
+    <div class="col-md-12">
+      <button type="submit" class="btn btn-success">Finish Pairing</button>
+    </div>
+  </form>
+
+  <hr />
+  <h4>Debug Console</h4>
+  <pre
+    id="debugConsole"
+    style="background: #f8f9fa; padding:1em; max-height: 300px; overflow-y:auto;"
+  ></pre>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+function appendDebug(msg) {
+  const d = document.getElementById("debugConsole");
+  d.textContent += msg + "\n";
+  d.scrollTop = d.scrollHeight;
+}
+
+let globalAtvID = "";
+
+// 1) Start Pairing
+document.getElementById("formPairing").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const tvID    = document.getElementById("tvID").value.trim();
+  const tvName  = document.getElementById("tvName").value.trim();
+  const tvIP    = document.getElementById("tvIP").value.trim();
+  const tvProto = document.getElementById("tvProtocol").value;
+
+  if (!tvID || !tvName || !tvIP) {
+    appendDebug("Error: Missing tvID, tvName, or tvIP");
+    return;
+  }
+
+  globalAtvID = tvID;
+  appendDebug(`Starting pairing => ID=${tvID}, name=${tvName}, ip=${tvIP}`);
+
+  axios
+    .post("/api/start_pairing", {
+      apple_tv_id: tvID,
+      apple_tv_name: tvName,
+      ip_address: tvIP,
+      protocol: tvProto
+    })
+    .then((resp) => {
+      if (resp.data.error) {
+        appendDebug("Error: " + resp.data.error);
+      } else if (resp.data.status === "pairing_started") {
+        appendDebug("Pairing started! Check Apple TV screen for a PIN code.");
+        document.getElementById("formPin").style.display = "block";
+      } else {
+        appendDebug(JSON.stringify(resp.data));
+      }
+    })
+    .catch((err) => {
+      appendDebug("Error: " + (err.response?.data?.error || err));
+    });
+});
+
+// 2) Finish Pairing (Enter PIN)
+document.getElementById("formPin").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const pinVal = document.getElementById("pinCode").value.trim();
+  if (!pinVal) {
+    appendDebug("Error: no PIN provided");
+    return;
+  }
+  appendDebug("Finishing pairing => " + pinVal);
+
+  axios
+    .post("/api/enter_pin", {
+      apple_tv_id: globalAtvID,
+      pin: pinVal
+    })
+    .then((resp) => {
+      if (resp.data.error) {
+        appendDebug("Error: " + resp.data.error);
+      } else if (resp.data.status === "pairing_finished") {
+        appendDebug("Pairing complete! Apple TV is now stored.");
+        document.getElementById("formPin").style.display = "none";
+      } else {
+        appendDebug("Result => " + resp.data.status);
+      }
+    })
+    .catch((err) => {
+      appendDebug("Error: " + (err.response?.data?.error || err));
+    });
+});
+</script>
+{% endblock %}
