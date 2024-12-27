@@ -3,6 +3,7 @@ Apple TV and Hue Light Integration
 This repository contains a Flask application that controls Apple TVs and Philips Hue lights, and also provides a system tray icon for easy management.
 
 Table of Contents
+
 Features
 Requirements
 Installation
