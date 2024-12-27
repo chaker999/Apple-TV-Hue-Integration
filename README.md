@@ -52,55 +52,57 @@ This project connects **Apple TVs** and **Hue Bridges** under one roof:
 
 ## Installation
 
-1. **Clone or Download** this repository:
-   ```bash
-   git clone https://github.com/chaker999/Apple-TV-Hue-Integration.git
-   cd Apple-TV-Hue-Integration
+You can either **clone** this repository or **download the ZIP**.
 
+```bash
+git clone https://github.com/chaker999/Apple-TV-Hue-Integration.git
+cd Apple-TV-Hue-Integration
 Or download the ZIP and extract it.
 
-Run Setup:
-
-Open command prompt on windows.  cd to the folder that you just extracted and enter:
+Run Setup
+bash
+Copy code
 python setup.py
-press enter
-
 If Python isn’t recognized, ensure it’s installed (3.7 or higher) and in your PATH.
 During setup:
+
 You’ll be prompted for a host IP (default: 127.0.0.1) and a port (default: 8888).
 The script installs dependencies from requirements.txt.
 It launches the Flask server in a detached process—no console needed.
 Opens your default browser to http://<host>:<port>.
 Closes its own setup console automatically.
-Confirm Setup:
-
+Confirm Setup
 Look for the system tray icon (Windows typically places new icons in the “hidden icons” area).
 The web dashboard should be open in your browser. If not, manually visit http://<host>:<port>.
-Future Launches:
-
+Future Launches
 On Windows, the script creates a run.bat file for you to double-click next time.
 On macOS/Linux, simply run python app.py & (or setup.py again, though setup is only needed once).
 Usage
 Windows
 After the first install, find run.bat in the project folder.
+
 Double-click run.bat:
 Starts app.py in a console.
 System tray icon appears near the clock.
 Possibly opens the browser automatically (depending on how run.bat is configured).
-Closing the console will kill the app** if using python.**
+Closing the console will kill the app if using python.
 If you want it to keep running after you close the console, edit run.bat to use pythonw app.py or:
+
 bat
 Copy code
 start pythonw app.py
 start http://127.0.0.1:8888
 exit
 This approach lets you close the run.bat window without stopping the background process.
+
 macOS & Linux
 No .bat file is created here. Instead:
+
 bash
 Copy code
 # Start the app
 python app.py &
+
 # or
 nohup python app.py &
 If you have a desktop environment, the tray icon should appear in the menubar (macOS) or system tray (e.g., GNOME/KDE on Linux).
@@ -128,25 +130,24 @@ Pillow
 …and possibly more. These are installed automatically when you run setup.py.
 Troubleshooting
 Tray Icon Missing
-
 Check “hidden icons” on Windows or look for the menubar icon on macOS.
 Ensure you’re running on a graphical desktop environment.
+
 Closing the Console Kills the App (Windows)
+By default, if you run python app.py in a standard console, closing it ends the process. Use pythonw.exe or DETACHED_PROCESS flags to keep it running after the console closes. The run.bat approach can be modified to start pythonw app.py.
 
-By default, if you run python app.py in a standard console, closing it ends the process.
-Use pythonw.exe or DETACHED_PROCESS flags to keep it running after the console closes.
-The run.bat approach can be modified to start pythonw app.py.
 Cannot Reach the Web Dashboard
+Make sure the host in config.json is accessible (e.g., 0.0.0.0 if you want to connect from other devices). Disable or configure your firewall if needed.
 
-Make sure the host in config.json is accessible (e.g., 0.0.0.0 if you want to connect from other devices).
-Disable or configure your firewall if needed.
 No Logs
+If you need real-time logs, run python app.py in a normal console to see output. For a background process, consider redirecting output to a file (e.g., nohup python app.py > app.log 2>&1 &).
 
-If you need real-time logs, run python app.py in a normal console to see output.
-For a background process, consider redirecting output to a file (e.g., nohup python app.py > app.log 2>&1 &).
 Headless Linux
-
 No tray icon is possible without a GUI. You can still use the web UI for all interactions.
+
 License
 This project is licensed under the MIT License.
 You’re free to copy, modify, and distribute as long as you retain the original license text.
+
+Enjoy controlling your Apple TV and Hue lights from one unified interface!
+Feel free to open an issue or create a pull request if you have improvements or run into any problems.
