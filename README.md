@@ -57,7 +57,7 @@ You can either **clone** this repository or **download the ZIP**.
 
 ```bash
 git clone https://github.com/chaker999/Apple-TV-Hue-Integration.git
-cd Apple-TV-Hue-Integration
+cd Apple-TV-Hue-Integration 
 
 If you download the ZIP, extract it to a folder of your choice.
 
@@ -83,9 +83,10 @@ Closes its own setup console automatically when finished.
 Look for the system tray icon (Windows typically places new icons in the “hidden icons” area). The web dashboard should be open in your browser. If not, manually visit http://<host>:<port>.
 
 Future Launches
+
 On Windows, the script creates a run.bat file for you to double-click next time.
 On macOS/Linux, simply run:
-bash
+
 Copy code
 python app.py &
 (or python setup.py again, although setup is only needed once).
@@ -161,3 +162,5 @@ You’re free to copy, modify, and distribute as long as you retain the original
 
 Enjoy controlling your Apple TV and Hue lights from one unified interface!
 Feel free to open an issue or create a pull request if you have improvements or run into any problems.
+
+I will not be able to trouble shoot macOS or Linix OS.  
