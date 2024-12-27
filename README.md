@@ -13,12 +13,7 @@ Seamlessly integrate your **Apple TV** with **Philips Hue** lighting via a **Fla
 2. [Features](#features)
 3. [Requirements](#requirements)
 4. [Installation](#installation)
-5. [Usage](#usage)
-   - [Windows](#windows)
-   - [macOS--linux](#macos--linux)
-6. [Configuration](#configuration)
-7. [Troubleshooting](#troubleshooting)
-8. [License](#license)
+
 
 ---
 
